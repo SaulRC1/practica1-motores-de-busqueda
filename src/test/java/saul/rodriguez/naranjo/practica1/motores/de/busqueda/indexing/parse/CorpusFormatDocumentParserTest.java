@@ -1,3 +1,5 @@
+package saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse;
+
 import java.io.FileNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
