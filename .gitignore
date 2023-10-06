@@ -1,0 +1,7 @@
+nb-configuration.xml
+nbactions.xml
+
+target/
+
+!**/src/main/**/target/
+!**/src/test/**/target/
