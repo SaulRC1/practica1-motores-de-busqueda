@@ -27,7 +27,7 @@ public class CorpusFormatDocumentParser implements DocumentParser
     public static final String CORPUS_DOCUMENT_TEXT = ".W";
     public static final String CORPUS_DOCUMENT_UNKNOWN = ".X";
     
-    public static final String SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY = "id";
+    public static final String SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY = "id_document";
     public static final String SOLR_INPUT_DOCUMENT_TITLE_KEY = "title";
     public static final String SOLR_INPUT_DOCUMENT_AUTHOR_KEY = "author";
     public static final String SOLR_INPUT_DOCUMENT_TEXT_KEY = "text";

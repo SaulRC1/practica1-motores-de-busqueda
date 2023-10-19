@@ -1,6 +1,6 @@
 {
     "add-field" : {
-        "name" : "id",
+        "name" : "id_document",
         "type" : "plong",
         "stored" : true,
         "indexed" : true,
