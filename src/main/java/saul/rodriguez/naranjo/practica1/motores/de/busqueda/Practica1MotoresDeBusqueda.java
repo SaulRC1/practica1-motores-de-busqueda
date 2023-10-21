@@ -57,16 +57,42 @@ public class Practica1MotoresDeBusqueda {
             System.out.println("Core: " + core);
         }*/
         
-        boolean coreExists = corpusSolrConnector.coreExists("micoleccion");
+        /*boolean coreExists = corpusSolrConnector.coreExists("micoleccion");
         
         if(coreExists)
         {
             System.out.println("Core exists");
+        }*/
+        
+        QueryDocumentParser corpusQueryDocumentParser = new CorpusFormatQueryDocumentParser();
+        
+        List<String> queryStrings = corpusQueryDocumentParser.parseQueryDocument("src/main/resources/cisi/CISI.QRY");
+        
+        for (String queryString : queryStrings)
+        {
+            //Only the first 5 words
+            String[] splittedQueryString = queryString.split(" ");
+            
+            queryString = "";
+            
+            for (int i = 0; i < splittedQueryString.length; i++)
+            {
+                if(i == 5)
+                {
+                    break;
+                }
+                
+                queryString += splittedQueryString[i] + " ";
+            }
+            
+            System.out.println("Query String: " + queryString);
+            
+            SolrQuery solrQuery = corpusQueryDocumentParser.buildStandardDocumentQuery(queryString);
+            
+            SolrDocumentList documentList = corpusSolrConnector
+                .queryCore("micoleccion", solrQuery);
+        
+            System.out.println("Document List: " + documentList);
         }
-        
-        SolrDocumentList documentList = corpusSolrConnector
-                .queryCore(null, new SolrQuery("*:*"));
-        
-        System.out.println("Document List: " + documentList);
     }
 }
