@@ -146,7 +146,12 @@ public class CorpusFormatQueryDocumentParser implements QueryDocumentParser
         {
             queryString = "*";
         }
-
+        
+        if(!queryString.equals("*"))
+        {
+            queryString = escapeSpecialCharactersFromQueryString(queryString);
+        }
+        
         corpusSolrQuery.setQuery(CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_TEXT_KEY
                 + ":" + queryString);
 
@@ -157,5 +162,24 @@ public class CorpusFormatQueryDocumentParser implements QueryDocumentParser
                 HighlightParams.SCORE);
 
         return corpusSolrQuery;
+    }
+    
+    /**
+     * Will escape all special characters from a query string.
+     * 
+     * <p>
+     * Special characters will be considered those that are not alphanumeric and
+     * spaces.
+     * </p>
+     * 
+     * @param queryString The string that must have special characters removed.
+     * 
+     * @return A clean query string without special characters.
+     */
+    protected String escapeSpecialCharactersFromQueryString(String queryString)
+    {
+        String escapedQueryString = queryString.replaceAll("[^a-zA-Z0-9 ]", "");
+        
+        return escapedQueryString;
     }
 }

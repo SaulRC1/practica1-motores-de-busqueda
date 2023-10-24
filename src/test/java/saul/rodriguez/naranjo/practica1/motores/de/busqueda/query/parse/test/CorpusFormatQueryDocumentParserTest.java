@@ -101,4 +101,22 @@ public class CorpusFormatQueryDocumentParserTest
             fail();
         }
     }
+    
+    @Test
+    public void test_correct_especial_characters_removal_from_query_string()
+    {
+        String expectedResult = "What problems exists in science";
+        
+        String testQueryString = "¿What_ problems. exists- ¡in! (science)?^+*";
+        
+        QueryDocumentParser queryDocumentParser = new CorpusFormatQueryDocumentParser();
+        
+        SolrQuery solrQuery = queryDocumentParser.buildStandardDocumentQuery(testQueryString);
+        
+        String valueQuery = solrQuery.getQuery().split(":")[1];
+        
+        System.out.println("Value Query: " + valueQuery);
+        
+        Assertions.assertEquals(expectedResult, valueQuery);
+    }
 }
