@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.params.HighlightParams;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.CorpusFormatDocumentParser;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.WrongDocumentExtensionException;
 
@@ -152,7 +153,8 @@ public class CorpusFormatQueryDocumentParser implements QueryDocumentParser
         corpusSolrQuery.setFields(CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY,
                 CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_TITLE_KEY,
                 CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_AUTHOR_KEY,
-                CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_TEXT_KEY);
+                CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_TEXT_KEY,
+                HighlightParams.SCORE);
 
         return corpusSolrQuery;
     }
