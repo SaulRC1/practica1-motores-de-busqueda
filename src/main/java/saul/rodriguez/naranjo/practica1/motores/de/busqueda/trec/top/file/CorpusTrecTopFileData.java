@@ -1,6 +1,11 @@
 package saul.rodriguez.naranjo.practica1.motores.de.busqueda.trec.top.file;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.HighlightParams;
 
 /**
  * This class represents the data that should be inserted for every query in a
@@ -252,6 +257,54 @@ public class CorpusTrecTopFileData
         }
 
         this.team = team.trim();
+    }
+
+    /**
+     * Builds a series of {@link CorpusTrecTopFileData} from a
+     * {@link SolrDocumentList}.
+     *
+     * @param solrDocuments The {@link SolrDocumentList} to be converted.
+     *
+     * @param queryId The queryId for the query that got returned the
+     * {@link SolrDocumentList} passed by parameter.
+     *
+     * @param phase The phase of the competition.
+     *
+     * @param team The team that executed the query.
+     *
+     * @return List of {@link CorpusTrecTopFileData}
+     */
+    public static List<CorpusTrecTopFileData> fromSolrDocumentList(SolrDocumentList solrDocuments,
+            long queryId, String phase, String team)
+    {
+        List<CorpusTrecTopFileData> corpusTrecTopFileDataList = new ArrayList<>();
+
+        long documentId = 1;
+
+        //The documents come ordered from the highest score to the lowest.
+        long ranking = 0;
+
+        for (SolrDocument solrDocument : solrDocuments)
+        {
+            CorpusTrecTopFileData corpusTrecTopFileData
+                    = new CorpusTrecTopFileData(queryId, phase, documentId, ranking,
+                            (float) solrDocument.getFieldValue(HighlightParams.SCORE), team);
+
+            corpusTrecTopFileDataList.add(corpusTrecTopFileData);
+
+            documentId++;
+            ranking++;
+        }
+
+        return corpusTrecTopFileDataList;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "CorpusTrecTopFileData{" + "queryId=" + queryId + ", phase=" + 
+                phase + ", documentId=" + documentId + ", ranking=" + ranking + 
+                ", score=" + score + ", team=" + team + '}';
     }
 
 }

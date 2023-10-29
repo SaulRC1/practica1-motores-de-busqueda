@@ -16,6 +16,7 @@ import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.Docum
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.WrongDocumentExtensionException;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.query.parse.CorpusFormatQueryDocumentParser;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.query.parse.QueryDocumentParser;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.trec.top.file.CorpusTrecTopFileData;
 
 /**
  *
@@ -68,6 +69,8 @@ public class Practica1MotoresDeBusqueda {
         
         List<String> queryStrings = corpusQueryDocumentParser.parseQueryDocument("src/main/resources/cisi/CISI.QRY");
         
+        long queryId = 1;
+        
         for (String queryString : queryStrings)
         {
             //Only the first 5 words
@@ -92,7 +95,15 @@ public class Practica1MotoresDeBusqueda {
             SolrDocumentList documentList = corpusSolrConnector
                 .queryCore("micoleccion", solrQuery);
         
-            System.out.println("Document List: " + documentList);
+            List<CorpusTrecTopFileData> corpusTrecTopFileDataList = 
+                    CorpusTrecTopFileData.fromSolrDocumentList(documentList, queryId, "Q0", "ETSI");
+            
+            for (CorpusTrecTopFileData corpusTrecTopFileData : corpusTrecTopFileDataList)
+            {
+                System.out.println(corpusTrecTopFileData);
+            }
+          
+            queryId++;
         }
     }
 }
