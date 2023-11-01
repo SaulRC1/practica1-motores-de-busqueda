@@ -307,4 +307,18 @@ public class CorpusTrecTopFileData
                 ", score=" + score + ", team=" + team + '}';
     }
 
+    /**
+     * Will return this {@link CorpusTrecTopFileData} formatted for the 
+     * trec_top_file
+     * 
+     * @return this {@link CorpusTrecTopFileData} formatted for the 
+     * trec_top_file
+     */
+    public String toTrecTopFileFormat()
+    {
+        String trecTopFileFormat = queryId + " " + phase + " " + documentId + " "
+                + ranking + " " + score + " " + team;
+        
+        return trecTopFileFormat;
+    }
 }
