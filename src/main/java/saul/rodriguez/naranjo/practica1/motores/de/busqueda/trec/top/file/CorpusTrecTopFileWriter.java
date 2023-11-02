@@ -60,6 +60,22 @@ public class CorpusTrecTopFileWriter
         }
     }
 
+    /**
+     * This method will check if the path provided exists and in case it does 
+     * not, it will create all necessary folders until the end of the path.
+     * 
+     * <p>
+     * In case the path provided exists, but it is not a directory, it will 
+     * throw {@link NotDirectoryException}.
+     * </p>
+     * 
+     * @param filePath The path where the file should be stored.
+     * 
+     * @throws IOException If an I/O error occurs.
+     * 
+     * @throws NotDirectoryException If the filePath points to something that it
+     * is not a directory.
+     */
     private void checkPathAvailability(String filePath) throws IOException
     {
         Path pathToDocument = Paths.get(filePath).toAbsolutePath();

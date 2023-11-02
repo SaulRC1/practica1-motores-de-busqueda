@@ -1,6 +1,7 @@
 package saul.rodriguez.naranjo.practica1.motores.de.busqueda;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrClient;
@@ -8,6 +9,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.connector.CorpusSolrConnector;
@@ -17,6 +19,7 @@ import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.Wrong
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.query.parse.CorpusFormatQueryDocumentParser;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.query.parse.QueryDocumentParser;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.trec.top.file.CorpusTrecTopFileData;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.trec.top.file.CorpusTrecTopFileWriter;
 
 /**
  *
@@ -69,6 +72,10 @@ public class Practica1MotoresDeBusqueda {
         
         List<String> queryStrings = corpusQueryDocumentParser.parseQueryDocument("src/main/resources/cisi/CISI.QRY");
         
+        List<CorpusTrecTopFileData> trecTopFileData = new ArrayList<>();
+        
+        CorpusTrecTopFileWriter corpusTrecTopFileWriter = new CorpusTrecTopFileWriter();
+        
         long queryId = 1;
         
         for (String queryString : queryStrings)
@@ -94,16 +101,26 @@ public class Practica1MotoresDeBusqueda {
             
             SolrDocumentList documentList = corpusSolrConnector
                 .queryCore("micoleccion", solrQuery);
+            
+            for (SolrDocument solrDocument : documentList)
+            {
+                System.out.println("Solr Doc: " + solrDocument);
+            }
         
             List<CorpusTrecTopFileData> corpusTrecTopFileDataList = 
                     CorpusTrecTopFileData.fromSolrDocumentList(documentList, queryId, "Q0", "ETSI");
+            
+            trecTopFileData.addAll(corpusTrecTopFileDataList);
             
             for (CorpusTrecTopFileData corpusTrecTopFileData : corpusTrecTopFileDataList)
             {
                 System.out.println(corpusTrecTopFileData);
             }
-          
+            
             queryId++;
         }
+        
+        corpusTrecTopFileWriter.writeTrecTopFile(trecTopFileData, 
+                "C:\\TestCorpus", "trec_top_file");
     }
 }

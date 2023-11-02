@@ -6,6 +6,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.HighlightParams;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.CorpusFormatDocumentParser;
 
 /**
  * This class represents the data that should be inserted for every query in a
@@ -279,20 +280,21 @@ public class CorpusTrecTopFileData
     {
         List<CorpusTrecTopFileData> corpusTrecTopFileDataList = new ArrayList<>();
 
-        long documentId = 1;
-
         //The documents come ordered from the highest score to the lowest.
         long ranking = 0;
 
         for (SolrDocument solrDocument : solrDocuments)
         {
+            double documentScore = (float) solrDocument.getFieldValue(HighlightParams.SCORE);
+            long solrDocumentId = (long) solrDocument.getFieldValue(
+                    CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY);
+            
             CorpusTrecTopFileData corpusTrecTopFileData
-                    = new CorpusTrecTopFileData(queryId, phase, documentId, ranking,
-                            (float) solrDocument.getFieldValue(HighlightParams.SCORE), team);
+                    = new CorpusTrecTopFileData(queryId, phase, solrDocumentId, ranking,
+                            documentScore, team);
 
             corpusTrecTopFileDataList.add(corpusTrecTopFileData);
 
-            documentId++;
             ranking++;
         }
 
