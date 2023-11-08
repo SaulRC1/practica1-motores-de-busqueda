@@ -20,6 +20,8 @@ public class CorpusConnection
     public static final String DEFAULT_PORT = "8983";
 
     private static CorpusConnection corpusConnection = new CorpusConnection();
+    
+    public static final String NOT_VALID_CONNECTION_MESSAGE = "No está conectado a Apache Solr.";
 
     private CorpusConnection()
     {

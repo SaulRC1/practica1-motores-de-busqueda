@@ -1,13 +1,28 @@
 package saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
+import org.apache.solr.common.SolrInputDocument;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.configuration.ServerConnectionConfigurationDialog;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.file.FileTypeFilter;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.indexing.IndexCorpusDocumentsPanel;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.task.LoadingDialog;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadDocumentsFromCorpusFileWorker;
 
 /**
  *
@@ -102,6 +117,94 @@ public class MainFrameMenuBar extends JMenuBar
                 serverConnectionConfigurationDialog.initializeComponents();
 
                 serverConnectionConfigurationDialog.setVisible(true);
+            });
+        });
+
+        indexCorpusDocumentsMenuItem.addActionListener((ActionEvent e) ->
+        {
+            ImageIcon loadingImage = new ImageIcon("src/main/resources/icons/loading_spinner.gif");
+
+            Image image = loadingImage.getImage(); // transform it
+            Image newimg = image.getScaledInstance(50, 50, java.awt.Image.SCALE_DEFAULT); // scale it the smooth way
+            loadingImage = new ImageIcon(newimg);  // transform it back
+
+            final LoadingDialog loadingDialog = new LoadingDialog(loadingImage,
+                    "Cargando documentos del Corpus, por favor, espere...",
+                    400, 200, parentFrame, "Cargando documento del Corpus");
+
+            SwingUtilities.invokeLater(() ->
+            {
+                String filePath;
+
+                JFileChooser fileChooser = new JFileChooser();
+
+                fileChooser.setMultiSelectionEnabled(false);
+
+                fileChooser.setFileFilter(new FileTypeFilter(".ALL", "Documentos del Corpus (.ALL)"));
+
+                fileChooser.showOpenDialog(parentFrame);
+
+                if (fileChooser.getSelectedFile() != null)
+                {
+                    filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+                    LoadDocumentsFromCorpusFileWorker loadDocumentsFromCorpusFileWorker
+                            = new LoadDocumentsFromCorpusFileWorker(filePath);
+
+                    loadDocumentsFromCorpusFileWorker.execute();
+
+                    Thread thread = new Thread(() ->
+                    {
+                        try
+                        {
+                            List<SolrInputDocument> solrInputDocuments
+                                    = loadDocumentsFromCorpusFileWorker.get();
+
+                            for (SolrInputDocument solrInputDocument : solrInputDocuments)
+                            {
+                                System.out.println(solrInputDocument);
+                            }
+
+                            SwingUtilities.invokeLater(() ->
+                            {
+                                loadingDialog.dispose();
+
+                                JOptionPane.showMessageDialog(parentFrame,
+                                        "Documentos cargados correctamente",
+                                        "Documentos cargados", JOptionPane.INFORMATION_MESSAGE);
+
+                                IndexCorpusDocumentsPanel indexCorpusDocumentsPanel
+                                        = new IndexCorpusDocumentsPanel(parentFrame, solrInputDocuments);
+
+                                parentFrame.setContentPane(indexCorpusDocumentsPanel);
+
+                                indexCorpusDocumentsPanel.initializeComponents();
+
+                                parentFrame.validate();
+                                parentFrame.repaint();
+
+                                indexCorpusDocumentsPanel.setVisible(true);
+                            });
+
+                        } catch (InterruptedException | ExecutionException ex)
+                        {
+                            Logger.getLogger(MainFrameMenuBar.class.getName()).log(Level.SEVERE, null, ex);
+
+                            SwingUtilities.invokeLater(() ->
+                            {
+                                loadingDialog.dispose();
+
+                                JOptionPane.showMessageDialog(parentFrame,
+                                        "Error al cargar documentos del archivo",
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+                            });
+                        }
+                    });
+
+                    thread.start();
+
+                    loadingDialog.setVisible(true);
+                }
             });
         });
     }

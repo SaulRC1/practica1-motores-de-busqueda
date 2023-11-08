@@ -12,6 +12,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.NonExistentCoreException;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -116,9 +117,12 @@ public class CorpusSolrConnector
      *
      * @param coreName The core name.
      * @param inputDocuments The list of input documents.
+     * @return An {@link UpdateResponse} to check if everything went accordingly.
      */
-    public void indexDocuments(String coreName, List<SolrInputDocument> inputDocuments)
+    public UpdateResponse indexDocuments(String coreName, List<SolrInputDocument> inputDocuments)
     {
+        UpdateResponse updateResponse = null;
+        
         try
         {
             if (!coreExists(coreName))
@@ -131,7 +135,7 @@ public class CorpusSolrConnector
                 solrClient.add(coreName, inputDocument);
             }
 
-            solrClient.commit(coreName);
+            updateResponse = solrClient.commit(coreName);
 
         } catch (SolrServerException | IOException ex)
         {
@@ -146,6 +150,8 @@ public class CorpusSolrConnector
 
             Logger.getLogger(CorpusSolrConnector.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
+        
+        return updateResponse;
     }
 
     public void createCore(String coreName)

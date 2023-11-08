@@ -17,9 +17,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import saul.rodriguez.naranjo.practica1.motores.de.busqueda.Practica1MotoresDeBusqueda;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.connector.CorpusConnection;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.connector.CorpusSolrConnector;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.MainFrame;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.ApacheSolrConnectionWorker;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.task.LoadingDialog;
 
@@ -178,6 +178,15 @@ public class ServerConnectionConfigurationDialog extends JDialog
                             SwingUtilities.invokeLater(() ->
                             {
                                 loadingDialog.dispose();
+                                
+                                if(this.getOwner() instanceof MainFrame)
+                                {
+                                    MainFrame mainFrame = (MainFrame) this.getOwner();
+                                
+                                    mainFrame.initializeConnectedContentPane();
+                                }
+                                
+                                this.dispose();
 
                                 JOptionPane.showMessageDialog((JFrame) this.getOwner(),
                                         "Conectado a Apache Solr correctamente", "Conectado", JOptionPane.INFORMATION_MESSAGE);
@@ -192,6 +201,13 @@ public class ServerConnectionConfigurationDialog extends JDialog
                             SwingUtilities.invokeLater(() ->
                             {
                                 loadingDialog.dispose();
+                                
+                                if(this.getOwner() instanceof MainFrame)
+                                {
+                                    MainFrame mainFrame = (MainFrame) this.getOwner();
+                                
+                                    mainFrame.initializeDisconnectedContentPane();
+                                }
 
                                 JOptionPane.showMessageDialog((JFrame) this.getOwner(), "No se ha podido conectar a Apache Solr.",
                                         "Error en la conexión", JOptionPane.ERROR_MESSAGE);
