@@ -33,7 +33,7 @@ public class MainFrame extends JFrame
     {
         this.getContentPane().setLayout(new BorderLayout());
         this.setTitle(CORPUS_APP_TITLE);
-        this.setAlwaysOnTop(true);
+        //this.setAlwaysOnTop(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setPreferredSize(new Dimension(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT));
         this.setMinimumSize(new Dimension(MINIMUM_WINDOW_WIDTH, MINIMUM_WINDOW_HEIGHT));

@@ -5,6 +5,8 @@ import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.indexing.parse.CorpusFormatDocumentParser;
 
@@ -60,6 +62,30 @@ public class CorpusDocumentTable extends JTable
         for (SolrInputDocument solrInputDocument : solrInputDocuments)
         {
             this.addDocument(solrInputDocument);
+        }
+    }
+    
+    public void addDocument(SolrDocument solrDocument)
+    {
+        DefaultTableModel tableModel = (DefaultTableModel) this.getModel();
+        
+        long documentId = (long) solrDocument.getFieldValue(
+                CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY);
+        
+        String documentTitle = (String) solrDocument.getFieldValue(
+                CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_TITLE_KEY);
+        
+        String documentAuthor = (String) solrDocument.getFieldValue(
+                CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_AUTHOR_KEY);
+        
+        tableModel.addRow(new Object[]{documentId, documentTitle, documentAuthor});
+    }
+    
+    public void addDocuments(SolrDocumentList documentList)
+    {
+        for (SolrDocument solrDocument : documentList)
+        {
+            addDocument(solrDocument);
         }
     }
 }

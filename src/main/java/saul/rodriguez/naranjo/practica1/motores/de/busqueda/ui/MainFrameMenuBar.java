@@ -17,12 +17,15 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.configuration.ServerConnectionConfigurationDialog;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.file.FileTypeFilter;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.indexing.IndexCorpusDocumentsPanel;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.query.QueryDocumentsFromFilePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.task.LoadingDialog;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadDocumentsFromCorpusFileWorker;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadQueriesFromQueryFileWorker;
 
 /**
  *
@@ -206,6 +209,100 @@ public class MainFrameMenuBar extends JMenuBar
                     loadingDialog.setVisible(true);
                 }
             });
+        });
+
+        this.queryApacheSolrByQueryFileMenuItem.addActionListener((ActionEvent e) ->
+        {
+            queryApacheSolrByQueryFileAction();
+        });
+    }
+
+    private void queryApacheSolrByQueryFileAction()
+    {
+        ImageIcon loadingImage = new ImageIcon("src/main/resources/icons/loading_spinner.gif");
+
+        Image image = loadingImage.getImage(); // transform it
+        Image newimg = image.getScaledInstance(50, 50, java.awt.Image.SCALE_DEFAULT); // scale it the smooth way
+        loadingImage = new ImageIcon(newimg);  // transform it back
+
+        final LoadingDialog loadingDialog = new LoadingDialog(loadingImage,
+                "Cargando documentos de consultas, por favor, espere...",
+                400, 200, parentFrame, "Cargando documento de consultas");
+
+        SwingUtilities.invokeLater(() ->
+        {
+            String filePath;
+
+            JFileChooser fileChooser = new JFileChooser();
+
+            fileChooser.setMultiSelectionEnabled(false);
+
+            fileChooser.setFileFilter(new FileTypeFilter(".QRY",
+                    "Documentos de consultas del Corpus (.QRY)"));
+
+            fileChooser.showOpenDialog(parentFrame);
+
+            if (fileChooser.getSelectedFile() != null)
+            {
+                filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+                LoadQueriesFromQueryFileWorker loadQueriesFromQueryFileWorker
+                        = new LoadQueriesFromQueryFileWorker(filePath);
+
+                loadQueriesFromQueryFileWorker.execute();
+
+                Thread thread = new Thread(() ->
+                {
+                    try
+                    {
+                        List<SolrQuery> solrQueries
+                                = loadQueriesFromQueryFileWorker.get();
+
+                        for (SolrQuery solrQuery : solrQueries)
+                        {
+                            System.out.println("Query: " + solrQuery);
+                        }
+
+                        SwingUtilities.invokeLater(() ->
+                        {
+                            loadingDialog.dispose();
+
+                            JOptionPane.showMessageDialog(parentFrame,
+                                    "Consultas cargadas correctamente",
+                                    "Consultas cargadas", JOptionPane.INFORMATION_MESSAGE);
+
+                            QueryDocumentsFromFilePanel queryDocumentsFromFilePanel
+                                    = new QueryDocumentsFromFilePanel(solrQueries, parentFrame);
+
+                            parentFrame.setContentPane(queryDocumentsFromFilePanel);
+
+                            queryDocumentsFromFilePanel.initializeComponents();
+
+                            parentFrame.validate();
+                            parentFrame.repaint();
+
+                            queryDocumentsFromFilePanel.setVisible(true);
+                        });
+
+                    } catch (InterruptedException | ExecutionException ex)
+                    {
+                        Logger.getLogger(MainFrameMenuBar.class.getName()).log(Level.SEVERE, null, ex);
+
+                        SwingUtilities.invokeLater(() ->
+                        {
+                            loadingDialog.dispose();
+
+                            JOptionPane.showMessageDialog(parentFrame,
+                                    "Error al cargar consultas del archivo",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        });
+                    }
+                });
+
+                thread.start();
+
+                loadingDialog.setVisible(true);
+            }
         });
     }
 }
