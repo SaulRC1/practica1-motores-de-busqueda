@@ -40,6 +40,8 @@ public class SolrQueryTable extends JScrollPane
     {
         DefaultTableModel tableModel = (DefaultTableModel) this.solrQueryTable.getModel();
         
+        tableModel.setRowCount(0);
+        
         long queryId = 0;
         
         for (SolrQuery solrQuery : solrQueries)

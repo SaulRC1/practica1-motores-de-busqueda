@@ -59,6 +59,31 @@ public class CorpusTrecTopFileWriter
             }
         }
     }
+    
+    /**
+     * Writes a trec_top_file with the data passed by parameter in the path
+     * defined by the caller.
+     *
+     * @param entryData The data to be added to the trec_top_file.
+     *
+     * @param filePath The path where whe trec_top_file will be stored.
+     *
+     * @throws java.io.IOException
+     */
+    public void writeTrecTopFile(List<CorpusTrecTopFileData> entryData,
+            String filePath) throws IOException
+    {   
+        Path pathToDocument = Paths.get(filePath).toAbsolutePath();
+
+        try ( BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter
+        (new File(pathToDocument.toString()))))
+        {
+            for (CorpusTrecTopFileData corpusTrecTopFileData : entryData)
+            {
+                bufferedWriter.write(corpusTrecTopFileData.toTrecTopFileFormat() + "\n");
+            }
+        }
+    }
 
     /**
      * This method will check if the path provided exists and in case it does 

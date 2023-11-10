@@ -59,6 +59,10 @@ public class CorpusDocumentTable extends JTable
     
     public void addDocuments(List<SolrInputDocument> solrInputDocuments)
     {
+        DefaultTableModel tableModel = (DefaultTableModel) this.getModel();
+        
+        tableModel.setRowCount(0);
+        
         for (SolrInputDocument solrInputDocument : solrInputDocuments)
         {
             this.addDocument(solrInputDocument);
@@ -83,6 +87,10 @@ public class CorpusDocumentTable extends JTable
     
     public void addDocuments(SolrDocumentList documentList)
     {
+        DefaultTableModel tableModel = (DefaultTableModel) this.getModel();
+        
+        tableModel.setRowCount(0);
+        
         for (SolrDocument solrDocument : documentList)
         {
             addDocument(solrDocument);

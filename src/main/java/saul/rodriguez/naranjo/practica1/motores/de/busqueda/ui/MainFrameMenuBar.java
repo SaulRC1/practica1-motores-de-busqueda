@@ -24,6 +24,7 @@ import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.file.FileTypeFilt
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.indexing.IndexCorpusDocumentsPanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.query.QueryDocumentsFromFilePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.task.LoadingDialog;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.trec.BuildTrecTopFilePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadDocumentsFromCorpusFileWorker;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadQueriesFromQueryFileWorker;
 
@@ -49,6 +50,8 @@ public class MainFrameMenuBar extends JMenuBar
             = "Consulta mediante archivo .QRY";
     private static final String SERVER_CONNECTION_PARAMETERS_MENU_ITEM_TITLE
             = "Conexión a Apache Solr";
+    private static final String BUILD_TREC_TOP_FILE_MENU_ITEM_TITLE
+            = "Construir archivo trec_top_file";
 
     private final JFrame parentFrame;
 
@@ -67,6 +70,8 @@ public class MainFrameMenuBar extends JMenuBar
 
     private JMenuItem customQueryApacheSolrMenuItem;
     private JMenuItem queryApacheSolrByQueryFileMenuItem;
+
+    private JMenuItem buildTrecTopFileMenuItem;
 
     public MainFrameMenuBar(JFrame parentFrame)
     {
@@ -92,10 +97,13 @@ public class MainFrameMenuBar extends JMenuBar
         queryApacheSolrSubMenu.add(customQueryApacheSolrMenuItem);
         queryApacheSolrSubMenu.add(queryApacheSolrByQueryFileMenuItem);
 
+        this.buildTrecTopFileMenuItem = new JMenuItem(BUILD_TREC_TOP_FILE_MENU_ITEM_TITLE);
+
         corpusMenu = new JMenu(CORPUS_MENU_TITLE);
 
         corpusMenu.add(indexDocumentsSubMenu);
         corpusMenu.add(queryApacheSolrSubMenu);
+        corpusMenu.add(buildTrecTopFileMenuItem);
 
         this.add(corpusMenu);
 
@@ -215,6 +223,11 @@ public class MainFrameMenuBar extends JMenuBar
         {
             queryApacheSolrByQueryFileAction();
         });
+
+        this.buildTrecTopFileMenuItem.addActionListener((ActionEvent e) ->
+        {
+            buildTrecTopFileAction();
+        });
     }
 
     private void queryApacheSolrByQueryFileAction()
@@ -303,6 +316,23 @@ public class MainFrameMenuBar extends JMenuBar
 
                 loadingDialog.setVisible(true);
             }
+        });
+    }
+
+    private void buildTrecTopFileAction()
+    {
+        SwingUtilities.invokeLater(() ->
+        {
+            BuildTrecTopFilePanel buildTrecTopFilePanel = new BuildTrecTopFilePanel(parentFrame);
+
+            parentFrame.setContentPane(buildTrecTopFilePanel);
+
+            buildTrecTopFilePanel.initializeComponents();
+
+            parentFrame.validate();
+            parentFrame.repaint();
+
+            buildTrecTopFilePanel.setVisible(true);
         });
     }
 }
