@@ -33,6 +33,4 @@ public class QueryApacheSolrCoreWorker extends SwingWorker<SolrDocumentList, Voi
         
         return connector.queryCore(coreName, solrQuery);
     }
-    
-    
 }

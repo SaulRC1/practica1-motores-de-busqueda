@@ -22,6 +22,7 @@ import org.apache.solr.common.SolrInputDocument;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.configuration.ServerConnectionConfigurationDialog;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.file.FileTypeFilter;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.indexing.IndexCorpusDocumentsPanel;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.query.QueryDocumentsFromCustomQueryPanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.query.QueryDocumentsFromFilePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.task.LoadingDialog;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.trec.BuildTrecTopFilePanel;
@@ -228,6 +229,11 @@ public class MainFrameMenuBar extends JMenuBar
         {
             buildTrecTopFileAction();
         });
+
+        this.customQueryApacheSolrMenuItem.addActionListener((ActionEvent e) ->
+        {
+            customQueryApacheSolrMenuItem();
+        });
     }
 
     private void queryApacheSolrByQueryFileAction()
@@ -333,6 +339,23 @@ public class MainFrameMenuBar extends JMenuBar
             parentFrame.repaint();
 
             buildTrecTopFilePanel.setVisible(true);
+        });
+    }
+
+    private void customQueryApacheSolrMenuItem()
+    {
+        SwingUtilities.invokeLater(() ->
+        {
+            QueryDocumentsFromCustomQueryPanel queryDocumentsFromCustomQueryPanel 
+                    = new QueryDocumentsFromCustomQueryPanel(parentFrame);
+            
+            queryDocumentsFromCustomQueryPanel.initializeComponents();
+            
+            parentFrame.setContentPane(queryDocumentsFromCustomQueryPanel);
+            parentFrame.validate();
+            parentFrame.repaint();
+            
+            queryDocumentsFromCustomQueryPanel.setVisible(true);
         });
     }
 }
