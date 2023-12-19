@@ -286,8 +286,8 @@ public class CorpusTrecTopFileData
         for (SolrDocument solrDocument : solrDocuments)
         {
             double documentScore = (float) solrDocument.getFieldValue(HighlightParams.SCORE);
-            long solrDocumentId = (long) solrDocument.getFieldValue(
-                    CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY);
+            long solrDocumentId = ((ArrayList<Long>) solrDocument.getFieldValue(
+                    CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_IDENTIFIER_KEY)).get(0);
             
             CorpusTrecTopFileData corpusTrecTopFileData
                     = new CorpusTrecTopFileData(queryId, phase, solrDocumentId, ranking,

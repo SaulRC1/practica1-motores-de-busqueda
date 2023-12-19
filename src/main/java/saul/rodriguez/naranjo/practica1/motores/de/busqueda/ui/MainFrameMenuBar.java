@@ -21,12 +21,14 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.configuration.ServerConnectionConfigurationDialog;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.file.FileTypeFilter;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.gate.BuildTrecTopFileWithGatePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.indexing.IndexCorpusDocumentsPanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.query.QueryDocumentsFromCustomQueryPanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.query.QueryDocumentsFromFilePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.task.LoadingDialog;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.trec.BuildTrecTopFilePanel;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadDocumentsFromCorpusFileWorker;
+import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadDocumentsFromGateCorpusFileWorker;
 import saul.rodriguez.naranjo.practica1.motores.de.busqueda.ui.worker.LoadQueriesFromQueryFileWorker;
 
 /**
@@ -53,6 +55,11 @@ public class MainFrameMenuBar extends JMenuBar
             = "Conexión a Apache Solr";
     private static final String BUILD_TREC_TOP_FILE_MENU_ITEM_TITLE
             = "Construir archivo trec_top_file";
+    private static final String GATE_MENU_TITLE = "Utilidades GATE";
+    private static final String INDEX_GATE_CORPUS_MENU_ITEM_TITLE
+            = "Indexar corpus en formato GATE";
+    private static final String BUILD_TREC_TOP_FILE_WITH_GATE_MENU_ITEM_TITLE
+            = "Construir archivo trec_top con GATE";
 
     private final JFrame parentFrame;
 
@@ -73,6 +80,11 @@ public class MainFrameMenuBar extends JMenuBar
     private JMenuItem queryApacheSolrByQueryFileMenuItem;
 
     private JMenuItem buildTrecTopFileMenuItem;
+
+    private JMenu gateMenu;
+
+    private JMenuItem indexGateCorpusMenuItem;
+    private JMenuItem buildTrecTopFileWithGateMenuItem;
 
     public MainFrameMenuBar(JFrame parentFrame)
     {
@@ -113,6 +125,16 @@ public class MainFrameMenuBar extends JMenuBar
         configurationMenu = new JMenu(CONFIGURATION_MENU_TITLE);
         configurationMenu.add(serverConnectionParametersMenuItem);
         this.add(configurationMenu);
+
+        gateMenu = new JMenu(GATE_MENU_TITLE);
+
+        indexGateCorpusMenuItem = new JMenuItem(INDEX_GATE_CORPUS_MENU_ITEM_TITLE);
+        buildTrecTopFileWithGateMenuItem = new JMenuItem(BUILD_TREC_TOP_FILE_WITH_GATE_MENU_ITEM_TITLE);
+
+        gateMenu.add(indexGateCorpusMenuItem);
+        gateMenu.add(buildTrecTopFileWithGateMenuItem);
+
+        this.add(gateMenu);
 
         this.initializeListeners();
     }
@@ -234,6 +256,16 @@ public class MainFrameMenuBar extends JMenuBar
         {
             customQueryApacheSolrMenuItem();
         });
+
+        this.indexGateCorpusMenuItem.addActionListener((ActionEvent e) ->
+        {
+            indexGateCorpusAction();
+        });
+        
+        this.buildTrecTopFileWithGateMenuItem.addActionListener((ActionEvent e) ->
+        {
+            buildTrecTopFileWithGateAction();
+        });
     }
 
     private void queryApacheSolrByQueryFileAction()
@@ -346,16 +378,121 @@ public class MainFrameMenuBar extends JMenuBar
     {
         SwingUtilities.invokeLater(() ->
         {
-            QueryDocumentsFromCustomQueryPanel queryDocumentsFromCustomQueryPanel 
+            QueryDocumentsFromCustomQueryPanel queryDocumentsFromCustomQueryPanel
                     = new QueryDocumentsFromCustomQueryPanel(parentFrame);
-            
+
             queryDocumentsFromCustomQueryPanel.initializeComponents();
-            
+
             parentFrame.setContentPane(queryDocumentsFromCustomQueryPanel);
             parentFrame.validate();
             parentFrame.repaint();
-            
+
             queryDocumentsFromCustomQueryPanel.setVisible(true);
+        });
+    }
+
+    private void indexGateCorpusAction()
+    {
+        ImageIcon loadingImage = new ImageIcon("src/main/resources/icons/loading_spinner.gif");
+
+        Image image = loadingImage.getImage(); // transform it
+        Image newimg = image.getScaledInstance(50, 50, java.awt.Image.SCALE_DEFAULT); // scale it the smooth way
+        loadingImage = new ImageIcon(newimg);  // transform it back
+
+        final LoadingDialog loadingDialog = new LoadingDialog(loadingImage,
+                "Cargando documentos del Corpus, por favor, espere...",
+                400, 200, parentFrame, "Cargando documento del Corpus");
+
+        SwingUtilities.invokeLater(() ->
+        {
+            String filePath;
+
+            JFileChooser fileChooser = new JFileChooser();
+
+            fileChooser.setMultiSelectionEnabled(false);
+
+            fileChooser.setFileFilter(new FileTypeFilter(".xml", "Documento xml (.xml)"));
+
+            fileChooser.showOpenDialog(parentFrame);
+
+            if (fileChooser.getSelectedFile() != null)
+            {
+                filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+                LoadDocumentsFromGateCorpusFileWorker loadDocumentsFromGateCorpusFileWorker
+                        = new LoadDocumentsFromGateCorpusFileWorker(filePath);
+
+                loadDocumentsFromGateCorpusFileWorker.execute();
+
+                Thread thread = new Thread(() ->
+                {
+                    try
+                    {
+                        List<SolrInputDocument> solrInputDocuments
+                                = loadDocumentsFromGateCorpusFileWorker.get();
+
+                        for (SolrInputDocument solrInputDocument : solrInputDocuments)
+                        {
+                            System.out.println(solrInputDocument);
+                        }
+
+                        SwingUtilities.invokeLater(() ->
+                        {
+                            loadingDialog.dispose();
+
+                            JOptionPane.showMessageDialog(parentFrame,
+                                    "Documentos cargados correctamente",
+                                    "Documentos cargados", JOptionPane.INFORMATION_MESSAGE);
+
+                            IndexCorpusDocumentsPanel indexCorpusDocumentsPanel
+                                    = new IndexCorpusDocumentsPanel(parentFrame, solrInputDocuments);
+
+                            parentFrame.setContentPane(indexCorpusDocumentsPanel);
+
+                            indexCorpusDocumentsPanel.initializeComponents();
+
+                            parentFrame.validate();
+                            parentFrame.repaint();
+
+                            indexCorpusDocumentsPanel.setVisible(true);
+                        });
+
+                    } catch (InterruptedException | ExecutionException ex)
+                    {
+                        Logger.getLogger(MainFrameMenuBar.class.getName()).log(Level.SEVERE, null, ex);
+
+                        SwingUtilities.invokeLater(() ->
+                        {
+                            loadingDialog.dispose();
+
+                            JOptionPane.showMessageDialog(parentFrame,
+                                    "Error al cargar documentos del archivo",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        });
+                    }
+                });
+
+                thread.start();
+
+                loadingDialog.setVisible(true);
+            }
+        });
+    }
+
+    private void buildTrecTopFileWithGateAction()
+    {
+        SwingUtilities.invokeLater(() ->
+        {
+            BuildTrecTopFileWithGatePanel buildTrecTopFilePanel = new BuildTrecTopFileWithGatePanel(parentFrame);
+
+            parentFrame.setContentPane(buildTrecTopFilePanel);
+
+            buildTrecTopFilePanel.initializeComponents();
+
+            parentFrame.validate();
+            parentFrame.repaint();
+
+            buildTrecTopFilePanel.setVisible(true);
         });
     }
 }

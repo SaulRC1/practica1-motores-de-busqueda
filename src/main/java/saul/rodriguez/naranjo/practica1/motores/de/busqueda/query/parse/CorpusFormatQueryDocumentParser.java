@@ -3,6 +3,9 @@ package saul.rodriguez.naranjo.practica1.motores.de.busqueda.query.parse;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -150,6 +153,16 @@ public class CorpusFormatQueryDocumentParser implements QueryDocumentParser
         if(!queryString.equals("*"))
         {
             queryString = escapeSpecialCharactersFromQueryString(queryString);
+        }
+        
+        try
+        {
+            //Converting queryString to UTF-8 encoding
+            queryString = URLEncoder.encode(queryString, "UTF-8");
+        } catch (UnsupportedEncodingException ex)
+        {
+            Logger.getLogger(CorpusFormatQueryDocumentParser.class.getName())
+                    .log(Level.SEVERE, null, ex);
         }
         
         corpusSolrQuery.setQuery(CorpusFormatDocumentParser.SOLR_INPUT_DOCUMENT_TEXT_KEY
